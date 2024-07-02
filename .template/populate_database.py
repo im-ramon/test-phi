@@ -1,23 +1,31 @@
-from langchain_community.document_loaders import PyPDFDirectoryLoader
+import argparse
+import os
+import shutil
+from langchain.document_loaders.pdf import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain.schema.document import Document
-from langchain_community.embeddings.spacy_embeddings import SpacyEmbeddings
-from langchain_community.vectorstores import Chroma
-from langchain.prompts import ChatPromptTemplate
+from get_embedding_function import get_embedding_function
+from langchain.vectorstores.chroma import Chroma
+
 
 CHROMA_PATH = "chroma"
 DATA_PATH = "data"
 
 
-PROMPT_TEMPLATE = """
-Answer the question based only on the following context:
+def main():
 
-{context}
+    # Check if the database should be cleared (using the --clear flag).
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--reset", action="store_true", help="Reset the database.")
+    args = parser.parse_args()
+    if args.reset:
+        print("✨ Clearing Database")
+        clear_database()
 
----
-
-Answer the question, in brazilian portuguese, based on the above context: {question}
-"""
+    # Create (or update) the data store.
+    documents = load_documents()
+    chunks = split_documents(documents)
+    add_to_chroma(chunks)
 
 
 def load_documents():
@@ -33,11 +41,6 @@ def split_documents(documents: list[Document]):
         is_separator_regex=False,
     )
     return text_splitter.split_documents(documents)
-
-
-def get_embedding_function():
-    embeddings = SpacyEmbeddings(model_name="pt_core_news_lg")
-    return embeddings
 
 
 def add_to_chroma(chunks: list[Document]):
@@ -98,29 +101,10 @@ def calculate_chunk_ids(chunks):
     return chunks
 
 
-def populate_database():
-    documents = load_documents()
-    chunks = split_documents(documents)
-    add_to_chroma(chunks)
+def clear_database():
+    if os.path.exists(CHROMA_PATH):
+        shutil.rmtree(CHROMA_PATH)
 
 
-def query_rag(query_text: str):
-    # Prepare the DB.
-    embedding_function = get_embedding_function()
-    db = Chroma(persist_directory=CHROMA_PATH,
-                embedding_function=embedding_function)
-
-    # Search the DB.
-    results = db.similarity_search_with_score(query_text, k=5)
-
-    context_text = "\n\n---\n\n".join(
-        [doc.page_content for doc, _score in results])
-    prompt_template = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    prompt = prompt_template.format(context=context_text, question=query_text)
-    # print(prompt)
-
-    return prompt
-
-
-query_rag('Qual objetivo do padrão de auditoria de imagens')
-# populate_database()
+if __name__ == "__main__":
+    main()

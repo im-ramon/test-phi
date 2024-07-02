@@ -1,3 +1,4 @@
 .huggingface/
 cpu_and_mobile/
 venv/
+__pycache__/

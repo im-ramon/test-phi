@@ -1,5 +1,5 @@
 .huggingface/
 model_zipped/
 cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/phi3-mini-128k-instruct-cpu-int4-rtn-block-32-acc-level-4.onnx.data
-venv/
+venv/ 
 __pycache__/

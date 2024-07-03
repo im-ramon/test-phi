@@ -1,5 +1,5 @@
 import onnxruntime_genai as og
-from search_dir_2 import query_rag
+from src.ai_manager import query_rag
 
 model = og.Model('cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4')
 tokenizer = og.Tokenizer(model)

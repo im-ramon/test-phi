@@ -3,12 +3,17 @@
 ```shel
 huggingface-cli download microsoft/Phi-3-mini-128k-instruct-onnx --include cpu_and_mobile/cpu-int4-rtn-block-32-acc-level-4/* --local-dir .
 ```
-2. Install Python requirements
+2. Active virtual environment
+```shel
+python -m venv venv ; .\venv\Scripts\activate
+```
+
+3. Install Python dependencies
 ```shel
 pip install -r "requirements.txt"
 ```
 
-3. Start
+3. Run
 ```shell
-.\venv\Scripts\activate ; python app.py 
+python app.py 
 ```
